@@ -6,29 +6,7 @@
 fun same_string(s1 : string, s2 : string) =
   s1 = s2
            
-(* ex 1a *)
-(*
-
-fun all_except_option (str, str_lst) =
-  let fun same_length (lst1, lst2) =
-        case (lst1, lst2) of
-            ([], [])             => true (* same length *)
-           |(hd1::tl1, hd2::tl2) => same_length(tl1, tl2)
-           | _                   => false
-      fun remove_str (xs) =
-        case xs of
-            []       => []
-          | hd :: tl => if same_string(hd, str)
-                        then remove_str(tl) (* dont append if str has been found *)
-                        else hd :: remove_str(tl)
-      val result_lst = remove_str(str_lst)
-  in
-      if same_length(result_lst, str_lst) (* same length means the str was not found*)
-      then NONE
-      else SOME result_lst 
-  end
-*)
-           
+(* ex 1a *)           
 (* string * string list -> OPTION string list *)
 fun all_except_option (str, str_lst) =
   let fun remove_str (str_lst, removed) =
@@ -115,7 +93,18 @@ fun remove_card (cs, c, e) =
   end
       
 (* ex 2d *)
-(* fun all_same_color cs = *)
+fun all_same_color cs =
+  case cs of
+      hd :: (nk :: []) => card_color(hd) = card_color(nk) (* two cards only *)
+    | hd :: (nk :: tl) => let val is_previous_same = all_same_color(nk :: tl)
+                          in 
+                              is_previous_same andalso (card_color(hd) = card_color(nk))
+                          end
+    | _ => true
+               
+(* ex 2e *)
+(* fun sum_cards cs = *)
+  
   
 
       

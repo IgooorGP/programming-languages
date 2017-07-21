@@ -1,5 +1,31 @@
+(* Igor G. Peternella - assignment 3 *)
+
 exception NoAnswer
 
+datatype pattern = Wildcard
+		 | Variable of string
+		 | UnitP
+		 | ConstP of int
+		 | TupleP of pattern list
+		 | ConstructorP of string * pattern
+
+datatype valu = Const of int
+	      | Unit
+	      | Tuple of valu list
+	      | Constructor of string * valu
+
+fun g f1 f2 p =
+    let 
+	val r = g f1 f2 
+    in
+	case p of
+	    Wildcard          => f1 ()
+	  | Variable x        => f2 x
+	  | TupleP ps         => List.foldl (fn (p,i) => (r p) + i) 0 ps
+	  | ConstructorP(_,p) => r p
+	  | _                 => 0
+    end
+              
 (* ex 1: Write a function only_capitals that takes a string list and returns a 
    string list that has only the strings in the argument that start with an 
    uppercase letter. Assume all strings have at least 1 character. Use List.filter, 
@@ -112,34 +138,10 @@ fun all_answers f xs =
   let val options_lst = List.map f xs (* [SOME[1], SOME[2], NONE, SOME[3], ...] *)
       fun aux ops =
         case ops of        
-            []                 => SOME []
-           |(NONE) :: tl       => NONE
-           |(SOME lst) :: rest => case (aux rest) of NONE => NONE | SOME thing => SOME (lst @ thing)
+             []                 => SOME []
+           | (NONE) :: _        => NONE
+           | (SOME lst) :: rest => case (aux rest) of NONE => NONE | SOME thing => SOME (lst @ thing)
   in (aux options_lst) end
-
-datatype pattern = Wildcard
-		 | Variable of string
-		 | UnitP
-		 | ConstP of int
-		 | TupleP of pattern list
-		 | ConstructorP of string * pattern
-
-datatype valu = Const of int
-	      | Unit
-	      | Tuple of valu list
-	      | Constructor of string * valu
-
-fun g f1 f2 p =
-    let 
-	val r = g f1 f2 
-    in
-	case p of
-	    Wildcard          => f1 ()
-	  | Variable x        => f2 x
-	  | TupleP ps         => List.foldl (fn (p,i) => (r p) + i) 0 ps
-	  | ConstructorP(_,p) => r p
-	  | _                 => 0
-    end
 
 (* ex 9:  A function g has been provided to you.
    (a) Use g to define a function count_wildcards that takes a pattern and returns how many Wildcard
@@ -170,10 +172,6 @@ fun count_some_var (s, p) =
    @ is useful in one case. The second takes a list of strings and decides if it has repeats. List.exists may
    be useful. Sample solution is 15 lines. These are hints: We are not requiring foldl and List.exists
    here, but they make it easier. *)
-    
-(* testing
-check_pat (TupleP [Wildcard, Wildcard, Variable "hey", Variable "hoi", Variable "x", Variable "x", Variable "y", ConstructorP("hehe", Variable "z"), ConstructorP("hihi", Wildcard), ConstructorP("hohoho", Variable "z"), ConstructorP("zz", TupleP[Variable "w", Variable "y", Variable "enough testing"])]); 
-*)
 
 fun check_pat p =
   let fun extract_strings p =
@@ -182,20 +180,18 @@ fun check_pat p =
           | TupleP ps => List.foldl (fn (ptrn, acc) => case ptrn of
                                                            Variable x => x :: acc
                                                          | ConstructorP(_, ptrn) => (extract_strings ptrn) @ acc
+                                                         | TupleP _ => (extract_strings ptrn) @ acc
                                                          | _ => acc) [] ps
           | ConstructorP(_, ptrn) => extract_strings ptrn
           | _ => []
                      
-      fun remove_repeats xs = (* (!) Runs in quadratic time (!) *)
+      fun has_repeated xs =
         case xs of
-            [] => []
-          | x :: xs' => let val rslt = remove_repeats xs'
-                        in
-                            if List.exists (fn y => x = y) rslt (* fn is a closure so this works *)
-                            then rslt
-                            else x :: rslt
-                        end
-  in (remove_repeats o extract_strings) p end
+            []       => true
+          | x :: xs' => let val prev = has_repeated xs' (* (!) Runs in quadratic time (!) *)
+                        in prev andalso not (List.exists(fn y => y = x) xs') end
+                            
+  in (has_repeated o extract_strings) p end
 
 (* ex 11: Write a function match that takes a valu * pattern and returns a (string * valu) list option,
    namely NONE if the pattern does not match and SOME lst where lst is the list of bindings if it does.
@@ -207,19 +203,17 @@ fun check_pat p =
 
 fun match (v, p) =
   case (v, p) of
-      (_, Wildcard) => SOME []
-    | (_, Variable x) => SOME [(x, v)]
-    | (Unit, UnitP) => SOME []
-    | (Const x, ConstP y) => if x = y then SOME [] else NONE
+      (_, Wildcard)         => SOME []
+    | (_, Variable x)       => SOME [(x, v)]
+    | (Unit, UnitP)         => SOME []
+    | (Const x, ConstP y)   => if x = y then SOME [] else NONE
     | (Tuple vs, TupleP ps) => if (List.length vs) <> (List.length ps) (* vs and ps must have same length *)
                                then NONE
-                               else all_answers (fn tpl => let val (value, ptrn) = tpl
-                                                           in match(value, ptrn)
-                                                           end) (ListPair.zip(vs, ps)) (* Zipped list: (val * ptrn) list *)
+                               else all_answers match (ListPair.zip(vs, ps)) (* Zipped list: (val * ptrn) list *)
     | (Constructor(s1, x), ConstructorP(s2, y)) => if s1 <> s2
                                                    then NONE
                                                    else match(x, y)
-    | _ => NONE (* includes the case when tuples have different length *)
+    | _ => NONE
 
 (* ex 12: Write a function first_match that takes a value and a list of patterns and returns a
    (string * valu) list option, namely NONE if no pattern in the list matches or SOME lst where
@@ -227,5 +221,5 @@ fun match (v, p) =
    handle-expression. Hints: Sample solution is 3 lines. *)
 
 fun first_match v ps =
-  
-
+  SOME (first_answer (fn p => match(v, p)) ps) (* first_answer does not return an option so we use SOME *)
+  handle NoAnswer => NONE

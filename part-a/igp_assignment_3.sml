@@ -33,7 +33,6 @@ fun g f1 f2 p =
         
 fun only_capitals str_lst =
   List.filter (fn str => (Char.isUpper o String.sub) (str, 0)) str_lst
-               
   
 (* ex 2: Write a function longest_string1 that takes a string list and returns the longest 
    string in the list. If the list is empty, return "". In the case of a tie, return 
@@ -41,22 +40,18 @@ fun only_capitals str_lst =
    (other than the implementation of foldl is recursive). *)
 
 fun longest_string1 str_lst =
-  case str_lst of
-      []      => ""
-    | s :: _ => List.foldl (fn (hd, acc) => if String.size acc >= String.size hd
+  List.foldl (fn (hd, acc) => if String.size acc >= String.size hd
                                             then acc   
-                                            else hd) s str_lst
+                                            else hd) "" str_lst
                            
 (* ex 3: Write a function longest_string2 that is exactly like longest_string1 except in 
    the case of ties it returns the string closest to the end of the list. Your solution should
    be almost an exact copy of longest_string1. Still use foldl and String.size. *)
                            
 fun longest_string2 str_lst =
-  case str_lst of
-      []      => ""
-    | s :: _ => List.foldl (fn (hd, acc) => if String.size acc > String.size hd
+  List.foldl (fn (hd, acc) => if String.size acc > String.size hd
                                             then acc   
-                                            else hd) s str_lst
+                                            else hd) "" str_lst
 
 (* ex 4: Write functions longest_string_helper, longest_string3, and longest_string4 such that:
    1. longest_string3 has the same behavior as longest_string1 and longest_string4 has the
@@ -84,7 +79,7 @@ val longest_string3 = longest_string_helper (fn (x,y) => x > y) (* partial app *
 val longest_string4 = longest_string_helper (fn (x,y) => x >= y) (* partial app *)
 
 (*
-        fun fold (f, acc, xs) =
+fun fold (f, acc, xs) =
   case xs of
       [] => acc
     | x :: xs' => fold(f, f(x, acc), xs') 
@@ -96,14 +91,8 @@ val longest_string4 = longest_string_helper (fn (x,y) => x >= y) (* partial app 
    ML library's o operator for composing functions. Resolve ties like in problem 2. *)
 
 fun longest_capitalized str_lst =
-  let
-      val uppercased_lst = List.filter (fn str => (Char.isUpper o String.sub) (str, 0)) str_lst 
-  in
-      case uppercased_lst of
-          [] => ""
-        | _  => longest_string1 uppercased_lst 
-  end
-
+  (longest_string1 o only_capitals) str_lst
+      
 (* ex 6: Write a function rev_string that takes a string and returns the string that is 
    the same characters in reverse order. Use ML's o operator, the library function rev for 
    reversing lists, and two library functions in the String module. (Browse the module 

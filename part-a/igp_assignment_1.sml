@@ -1,16 +1,14 @@
 (* Assignment 1 by Igor Grillo Peternella *)
 
-(* ex 1 *)
+(* ex 1: Write a function is_older that takes two dates and evaluates to true or false. It evaluates to true if
+   the first argument is a date that comes before the second argument. (If the two dates are the same,
+   the result is false.) *)
 fun is_older (dt1 : int * int * int, dt2 : int * int * int) =
-  if #1 dt1 < #1 dt2 
-  then true
-  else if #1 dt1 = #1 dt2 andalso #2 dt1 < #2 dt2
-  then true
-  else if #1 dt1 = #1 dt2 andalso #2 dt1 = #2 dt2 andalso #3 dt1 < #3 dt2
-  then true
-  else false
+  (#1 dt1 < #1 dt2) orelse
+  (#1 dt1 = #1 dt2) andalso (#2 dt1 < #2 dt2) orelse
+  (#1 dt1 = #1 dt2) andalso (#2 dt1 = #2 dt2) andalso (#3 dt1 < #3 dt2)
 
-(* ex2 *)
+(* ex2: *)
 fun number_in_month (dates : (int * int * int) list, month : int) =
   if null dates
   then 0
@@ -39,19 +37,6 @@ fun get_nth (xs : string list, n : int) =
   if n = 1
   then hd xs
   else get_nth(tl xs, n - 1)
-	      
-(*
-      ** uses an aux function ***  			 
-fun get_nth (xs : string list, n : int) =
-  let
-      fun aux (xs: string list, k : int) =
-	if k = n
-	then hd xs
-	else aux(tl xs, k + 1)
-  in
-      aux(xs, 1)
-  end 
-*)
 
 (* ex7 *)
 fun date_to_string (date : int * int * int) =

@@ -1,6 +1,14 @@
 # Programming Languages Course Solutions (Part A)
 
-Solutions for the Coursera's course Programming Languages by Dan Grossman. It contains:
+Solutions for the Coursera's course Programming Languages by Dan Grossman. Implemented in SML.
 
-* Exercises implemented in the SML language;
-* Functional programming and general programming language concepts such as closures, lexical scope, bindings, type inference, etc.
+# Topics covered:
+
+* Environments and bindings;
+* Recursion;
+* Tail recursion;
+* Lexical scope;
+* Closures;
+* Type Inference.
+* Many other functional programming concepts and general programming languages concepts.
+

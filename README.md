@@ -9,6 +9,6 @@ Solutions for the Coursera's course Programming Languages by Dan Grossman. Imple
 * Tail recursion;
 * Lexical scope;
 * Closures;
-* Type Inference.
+* Type Inference;
 * Many other functional programming concepts and general programming languages concepts.
 
